@@ -1,112 +1,27 @@
-import functions_framework
-import datetime
+from fastapi import FastAPI, Request
+from pydantic import BaseModel
 
-test_payload = '''<?xml version="1.0" encoding="utf-8"?>
-<PrintRequestInfo Version="2.00">
-  <ePOSPrint>
-<Parameter>
-  <devid>local_printer</devid>
-  <timeout>10000</timeout>
-  <printjobid>ABC123</printjobid>
-</Parameter>
-<PrintData>
-<epos-print xmlns="http://www.epson-pos.com/schemas/2011/03/epos-print">
-     <text lang="en" /> 
-     <text smooth="true" /> 
-     <text align="center" /> 
-     <text font="font_b" /> 
-     <text width="2" height="2" /> 
-     <text reverse="false" ul="false" em="true" color="color_1" /> 
-     <text>DELIVERY TICKET</text> 
-     <feed unit="12" /> 
-     <text></text> 
-     <text align="left" /> 
-     <text font="font_a" /> 
-     <text width="1" height="1" /> 
-     <text reverse="false" ul="false" em="false" color="color_1" /> 
-     <text>Order 0001</text> 
-     <text width="1" height="1" /> 
-     <text reverse="false" ul="false" em="false" color="color_1" /> 
-     <text>Time Mar 19 2013 13:53:15</text> 
-     <text>Seat A-3</text> 
-     <text></text> 
-     <text width="1" height="1" /> 
-     <text reverse="false" ul="false" em="false" color="color_1" /> 
-     <text>Alt Beer</text> 
-     <text>$6.00 x 2</text> 
-     <text x="384" /> 
-     <text>$12.00</text> 
-     <text></text> 
-     <text reverse="false" ul="false" em="true" /> 
-     <text width="2" height="1" /> 
-     <text>TOTAL</text> 
-     <text x="264" /> 
-     <text>$12.00</text> 
-     <text reverse="false" ul="false" em="false" /> 
-     <text width="1" height="1" /> 
-     <feed unit="12" /> 
-     <text align="center" /> 
-     <barcode type="code39" hri="none" font="font_a" width="2" height="60">0001</barcode> 
-     <feed line="3" /> 
-     <cut type="feed" /> 
-     </epos-print>
-</PrintData>
-  </ePOSPrint>
-  <ePOSPrint>
-<Parameter>
-  <devid>local_printer</devid>
-  <timeout>10000</timeout>
-  <printjobid>ABC123</printjobid>
-</Parameter>
-<PrintData>
-<epos-print xmlns="http://www.epson-pos.com/schemas/2011/03/epos-print">
-     <text lang="en" /> 
-     <text smooth="true" /> 
-     <text align="center" /> 
-     <text font="font_b" /> 
-     <text width="2" height="2" /> 
-     <text reverse="false" ul="false" em="true" color="color_1" /> 
-     <text>DELIVERY TICKET 2</text> 
-     <feed unit="12" /> 
-     <text></text> 
-     <text align="left" /> 
-     <text font="font_a" /> 
-     <text width="1" height="1" /> 
-     <text reverse="false" ul="false" em="false" color="color_1" /> 
-     <text>Order 0001</text> 
-     <text width="1" height="1" /> 
-     <text reverse="false" ul="false" em="false" color="color_1" /> 
-     <text>Time Mar 19 2013 13:53:15</text> 
-     <text>Seat A-3</text> 
-     <text></text> 
-     <text width="1" height="1" /> 
-     <text reverse="false" ul="false" em="false" color="color_1" /> 
-     <text>Alt Beer</text> 
-     <text>$6.00 x 2</text> 
-     <text x="384" /> 
-     <text>$12.00</text> 
-     <text></text> 
-     <text reverse="false" ul="false" em="true" /> 
-     <text width="2" height="1" /> 
-     <text>TOTAL</text> 
-     <text x="264" /> 
-     <text>$12.00</text> 
-     <text reverse="false" ul="false" em="false" /> 
-     <text width="1" height="1" /> 
-     <feed unit="12" /> 
-     <text align="center" /> 
-     <barcode type="code39" hri="none" font="font_a" width="2" height="60">0001</barcode> 
-     <feed line="3" /> 
-     <cut type="feed" /> 
-     </epos-print>
-</PrintData>
-  </ePOSPrint>
-</PrintRequestInfo>'''
+class Document(BaseModel):
+    doc_xml: str
 
-@functions_framework.http
-def handler(req):
-    print(str(datetime.datetime.now()), str(req))
-    body = req.get_json(silent=True)
-    if body:
-        print(body)
+app = FastAPI()
+
+def auth(api_key):
+    pass
+
+@app.post("/request_jobs")
+async def get_print_jobs(req: Request):
+    body = await req.form()
+    client_ip = req.client.host
+    data = dict(body)
+    connection_type = data["ConnectionType"] if "ConnectionType" in data else None
+    api_key = data['ID'] if "ID" in data else None
+    name = data["Name"] if "Name" in data else "Unknown"
+    if connection_type == "GetRequest":
+        print(client_ip, "-",connection_type)
+        return ""
     return ""
+
+@app.post("/print_jobs")
+async def post_print_jobs():
+    pass

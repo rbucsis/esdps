@@ -7,9 +7,12 @@ import auth
 class Document(BaseModel):
     doc_xml: str
 
-app = FastAPI()
+app = FastAPI(
+    docs_url=None,
+    redoc_url="/documentation"
+)
 
-@app.post("/request_jobs")
+@app.post("/request_jobs", include_in_schema=False)
 async def get_print_jobs(req: Request):
     body = await req.form()
     client_ip = req.client.host
@@ -65,7 +68,7 @@ async def get_print_jobs(req: Request):
     return ""
 
 @app.post("/print_jobs")
-async def post_print_jobs(Authorization: Annotated[str, Header()], req: Document):
+async def create_print_job(Authorization: Annotated[str, Header()], req: Document):
     api_key = Authorization.split(" ")[1] if "Bearer " in Authorization else None
     if not api_key:
         raise HTTPException(status_code=401, detail="Unauthorized")
